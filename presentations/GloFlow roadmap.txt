@@ -1,0 +1,118 @@
+GloFlow
+Product roadmap and ideas
+
+Project (macro) goals:
+Develop the largest open image database on the net
+Internet needs a open-source decentralized non-censored image DB
+Anyone can publish and view images
+Develop and foster a community and economy for image processors
+Anyone can submit requests for processing that a pool of processor parties would accept and satisfy.
+Processors would run the GF system that would execute it graphics processing routines.
+Take advantage of Ethereum currency and smart-contract infra to codify business rules for image processors and to compensate them for their work.
+Develop and foster a community and economy of image servers/CDN
+Individuals and companies will be able to specialize in serving content on the GF network with low-latency characteristics.
+
+History
+Project started roughly in 2012
+Multiple long breaks in dev of 6-12 months (preocupied with work and other life events).
+Multiple rewrites, 3 major language changes
+1st - Python backend, JS frontend
+2nd - Dart-lang backend/frontend
+3rd - Golang backend/typescript/JS frontend
+Serious consideration of Ethereum and smart-contract tech happened around 2020 and thought began on how to take advantage.
+
+Major goals
+P2p network buildout
+Allow for a p2p network of all GF nodes to get bootstrapped. 
+Use libp2p
+Well supported lib used by IPFS,Polkadot and possibly Ethereum in the future.
+Already researched and seems to be a good fit
+Initial functionality to build on top of p2p network
+Discovery/advertising/sharing of image flows
+Sharing of images between users in a non-centralized/private manner
+Offloading large-scale image computation to other p2p nodes
+Application of image filters to large image sets
+Figure out a incentivization/compensation mechanism for users who accept to compute for others.
+Figure out a verification mechanism where users can verify that computation was correctly applied to their image sets
+
+Major goals
+
+Build out GloFlow backend into a self-hosted system that any user can very easily host themselves.
+gf_solo is a non-microservice version of GF that was developed in the last year.
+Merges all the core GF “apps” into a single binary server that can be run simply on any server by starting the gf_solo container.
+Anyone should be able to run their own GF server.
+Another container version that includes the DB server needs to be created, to allow complete novices to startup their own GF server.
+Polish and streamline the plugin system to allow third-party devs to create plugins for most  parts of the functionality.
+Currently only a few hooks in the system exist for very specialized functionality
+Mainly for Python plugins
+Some Golang hooks for certain types of events.
+This can easily be expanded, developer time is required and some thought/planning on which parts of the functionality are most appropriate for extensions.
+
+Image Filesystem
+Initial work started on creating an image storage abstraction layer.
+Initial storage backends
+AWS S3
+Longest run and currently running in prod
+More work needed for further features - multibucket support, image chunking and storage to multiple buckets.
+Local - when users want to serve content from the same servers on which GF itself runs.
+IPFS 
+This needs to be completed, for storing and serving images from the IPFS network.
+Subsequent backends
+Google Drive
+
+Web3 infra
+Merged another major project - Web3-monitor - into gloflow core
+Code to index Ethereum blocks/txs.
+NFTs
+NFT are significant way to monetize visual-media, and therefore are to be deeply integrated into the GF core.
+Started adding comprehensive support for indexing NFT’s and all transactions that involve their purchasing and ownership transfers.
+For now Ethereum NFT’s supported.
+Tezos NFT support needs to be added.
+Year-long experience running a full-archive Ethereum node.
+Significant cost so waiting for more funding to start hosting it again.
+
+Crawler
+Golang image crawler
+Extracts image links from target pages, and downloads images.
+Goal is to build a robust system to accumulate images from thirdparty sites.
+Discovered hyperlinks and follows them to load images from further pages.
+Needs improvements to:
+Not crawl sites of low quality of images
+Not download images that are NSFW or are of non-artistic type and therefore not interesting
+Built in some sort of simple ML Reinforcement-learning so that the crawler learns which domains yield images that the user-base views frequently, and then crawl those domains deeper than other domains. 
+
+UI improvements
+Significant polish and design improvements need to be done to the UI to modernize it.
+Theme support is a big item to add
+Goal is to allow users to load arbitrary themes to their account of GloFlow
+Allow self-hosted GloFlow versi
+
+Funding
+Very close functionality wise to begin searching for funding sources.
+2 possible approaches:
+Go for community/open-source funding
+Gitcoin grants
+Initial small-scale funding, to get further opensource exposure and onboard 1 more dev and further dev core features.
+Will provide significant exposure and recognition in the web3 dev community.
+Coin issuance
+Ultimate goal
+Ideal way to raise significant sums while staying maximally community-incentivised and long-term focused.
+Funds will be managed by the public organization (not a private company), and voting as a mechanism will be used for allocating funds to development efforts
+Significant maturation of dev processes needs to happen first, and the GF network needs to be sufficiently decentralized (both in terms of parties running GF nodes and the dev community developing the codebase).
+Standard angel/VC investment path
+Well understood
+Quick to execute
+Suboptimal in decentralization and independence of incentives and decision-making
+Possibly hostile to community interestes
+
+Expand dev team
+Find devs to focus on following backend.
+Initial major focus
+Backend needs the most development.
+Frontend work will happen with a lesser focus, and parties should be incentivized to develop multiple frontends.
+Dev team should be kept small in the beginning, to be maximally efficient.
+
+Protocol dev
+At some point in the neartterm work should be started on formalizing the GF protocol.
+Semantics should be noted and devs should be encouraged to develop alternative implementations of GF
+In languages like Py/JS(node.js)
