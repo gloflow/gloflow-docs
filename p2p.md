@@ -44,13 +44,15 @@ Peer identity:
 
 
 Muliaddress
-- encoding multiple layers of addressing into a singple path structure
+- encoding multiple layers of addressing into a single path structure
+- multiaddress includes peerID, public IP of some sort, port number, transport protocol to be used.
 
 
 Connection encryption
 - all connections between peers are encrypted
 - peer private-keys are used for encryption, and can be verified to come from that peer via its public-key
-
+- encryption of connections assures among other things that if relay-peers are used (peers that relay data between multiple other peers) they cannot read relayed data.
+ 
 Peer Store
 - each peer has this temporary store
 - holds a list of known peers that a particular peer is connected to
