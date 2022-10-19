@@ -8,7 +8,6 @@
 # **Flow** Sharing/Discovery
 - private flows belonging to a peer should only be discoverable by desired target peers
 - public flows belonging to a peer should be broadcasted to the whole network of peers
-- 
 
 # **Image sharing** between individual peers
 - allow transfer of individual image files between peers that chose to exchange this data
@@ -90,15 +89,16 @@
     - possibly create a simple tool for operators that can introspect the global DHT and check for garbage vs valid peers
 
 # p2p libp2p attacks
-- Sybil Attacks
-    - https://docs.libp2p.io/concepts/security-considerations/#sybil-attacks
-    - one operator spins up a large number of DHT peers with distinct identities to flood the network
-    - By controlling a large number of Sybil nodes (in proportion to the size of the network), a bad actor increases the probability of being in the lookup path for queries
-    - To target a specific key, they could improve their chances of being in the lookup path further by generating IDs that are “close” to the target key according the DHT’s distance metric
-    - Applications can guard against modification of data by:
-        - detect if the data has been tampered with
-            - signing values that are stored in the DHT
-            - using content addressing, where a cryptographic hash of the stored value is used as the key, as in IPFS
-- Eclipse attacks
-    - uses a large number of controlled nodes
-    - targeted at a specific peer with the goal of distorting their “view” of the network
+**Sybil Attacks**
+- https://docs.libp2p.io/concepts/security-considerations/#sybil-attacks  
+- one operator spins up a large number of DHT peers with distinct identities to flood the network  
+- By controlling a large number of Sybil nodes (in proportion to the size of the network), a bad actor increases the probability of being in the lookup path for queries  
+- To target a specific key, they could improve their chances of being in the lookup path further by generating IDs that are “close” to the target key according the DHT’s distance metric  
+- Applications can guard against modification of data by:  
+    - detect if the data has been tampered with  
+        - signing values that are stored in the DHT  
+        - using content addressing, where a cryptographic hash of the stored value is used as the key, as in IPFS  
+        
+**Eclipse attacks**
+- uses a large number of controlled nodes
+- targeted at a specific peer with the goal of distorting their “view” of the network
