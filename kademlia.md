@@ -2,11 +2,14 @@
 
 # distributed hash table
 - https://en.wikipedia.org/wiki/Kademlia  
+- https://medium.com/coinmonks/a-brief-overview-of-kademlia-and-its-use-in-various-decentralized-platforms-da08a7f72b8f
+- https://en.wikipedia.org/wiki/Distributed_hash_table
 
 # nodes
 - nodes communicate among themselves using UDP  
 - each node is identified by a **node ID** (160bit hash - SHA-1)  
     - The 160-bucket array routing table layout is a simplified approached for the proof of the paper, later revisions introduce a more sophisticated tree-based table  
+- libp2p uses the base58btc encoding to encode the multiaddre into a node ID hash
 - node ID provides a direct map to file hashes  
 - each node in the network is a leaf in a binary-tree, placed according to the binary representation of their node ID.  
     - tree leaves are **k-buckets**  
@@ -37,16 +40,21 @@
     - *n* - actual number of nodes in the network  
     - *k* - bucket size  
         - larger bucket implementations slightly reduce the total number of buckets in the routing table.  
+        - does the bucket size have to be consistent accross the whole network?
+            - does the network have to reach consensus on the k-bucket dynamically or is it set at network boot?
+
 
 # XOR metric  
 - how distance is defined between points in the key-space  
 - given two 160bit node IDs the distance between them is defined as the XOR of those 2 IDs.  
+
 
 # long-lived nodes  
 - network prefers them over short-lived nodes (new entrants)  
 - algo assumes that the longer the nodes have been alive the more likely they are to remain online in the future.  
 - concept of node churn leads to the desire to minimize network repair cost.  
 - one cannot overtake a ndoes routing state by flooding the network with new nodes.  
+
 
 # RPC protocol  
 - message types  
@@ -59,10 +67,23 @@
         - returns the k nodes closest to the target identifier  
         - if the RPC recipient has received a STORE for the given key, it returns the stored value  
 
+# S/Kademlina
+- secure key-based routing protocol based on Kademlia
+    - using parallel lookups over multiple disjoint paths
+    - limiting free nodeld generation with crypto puzzles
+    - introducing a reliable **sibling broadcast**
+- https://git.gnunet.org/bibliography.git/plain/docs/SKademlia2007.pdf
+
 # var  
 - nodes issue parallel queries to the network to prevent timeout delays  
 - good visualization of Kademlia protocol - https://kelseyc18.github.io/kademlia_vis/basics/1/  
-
+- some sort of network tracing/hop-counting tool should exist (@kevin)
+    - to count the number of hops for example in a FIND_NODE network query
+    - look into periodically running various FIND_NODE/FIND_VALUE queries for various keys to maybe see how the values change (how often the values change) (for some really common keys or keys that have system/network relevance/importance) or how often they change.
+        - cardinality of the set of values of various reserved/system keys
+    - run the XOR metric periodiocally on all discover peers (over time) and measure their distance over time to see on average (statisticlly) how those distance are distribute.
+        - is it a normal-distribution
+        
 # used by projects:  
 - **Ethereum**  
 - **IPFS**  
@@ -70,7 +91,10 @@
 - BitTorrent  
 - Swarm  
 
-# libp2p implementation  
+# libp2p implementation
+- IpfsDHT is an implementation of Kademlia with S/Kademlia modifications
+    - used to implement the base Routing module
+- https://github.com/libp2p/go-libp2p-kad-dht
 - Node ID  
     - spec - https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md  
     - IDs are base58btc encoded (base58-bitcoin) - used to WIF for bitcoin address  
