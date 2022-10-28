@@ -92,9 +92,30 @@
 - Swarm  
 
 # libp2p implementation
-- IpfsDHT is an implementation of Kademlia with S/Kademlia modifications
+- IpfsDHT is an implementation of Kademlia with **S/Kademlia**, **Coral** and **mainlineDHT** modifications
     - used to implement the base Routing module
+    - BitTorrent DHT spec - https://github.com/libp2p/specs/blob/master/kad-dht/README.md  
 - https://github.com/libp2p/go-libp2p-kad-dht
+- Distance  
+    - XOR(sha256(key1), sha256(key2))  
+- Replication Parameter *k*
+    - amount of replication is governed by it  
+    - recommended value for *k* is 20  
+- Concurrency parameter *α*  
+    - concurrency of node and value lookups are limited by this param  
+    - default value of 3  
+    - each lookup process can perform no more than 3 inflight requests, at any given time  
 - Node ID  
     - spec - https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md  
     - IDs are base58btc encoded (base58-bitcoin) - used to WIF for bitcoin address  
+- **Client/Server** mode  
+    - **Server** mode  
+        - unrestricted nodes; Internet, publicly routable nodes, e.g. servers in a datacenter  
+        - nodes advertise the libp2p Kademlia protocol identifier via the *identify* protocol  
+        - accept incoming streams using the Kademlia protocol identifier  
+    - **Client** mode 
+        - restricted nodes; those with intermittent availability, high latency, low bandwidth, low CPU/RAM/Storage; non-publicly routable nodes, e.g. laptops behind a NAT and firewall.  
+        - nodes do not advertise support for the libp2p Kademlia protocol identifier.  
+        - nodes do not offer the Kademlia protocol identifier for incoming streams.  
+    - Nodes add another node to their routing table if and only if that node operates in server mode. 
+        - allows restricted nodes to utilize the DHT (query the DHT), without decreasing the quality of the distributed hash table (without polluting the routing tables)  

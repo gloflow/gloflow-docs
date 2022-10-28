@@ -62,7 +62,7 @@ supported libp2p transports:
 - libp2p does not implement this part of security
 - GF will need to implement a authorization mechanism to verify peers are permited to interact with particular data and conduct actions.
 
-# Protocols:
+# Protocols
 - protocol handlers
     - functions that handle data incoming for a particular protocol ID
 - protocol negotiation
@@ -70,3 +70,19 @@ supported libp2p transports:
 - protocol ID
     - each protocol supported by peer is identified by it
     - ibp2p will route each protocol id to its handler function using exact literal matching of the protocol id
+
+# Content Routing
+- Content routing provides a way to find where content lives in the network  
+    - steps:  
+        1. Peers provide (announce) to the network that they are holders of specific content  
+        2. Peers issue queries to find where that content lives  
+- content routing modules:
+    - @libp2p/kad-dht  
+    - @libp2p/delegated-content-routing  
+
+# Peer Routing  
+- way to find other peers in the network by issuing queries using a Peer Routing algorithm
+- If the algorithm is unable to find the target peer, it will return the peers that are "closest" to the target peer, using a distance metric defined by the algorithm
+- peer routing modules:
+    - @libp2p/kad-dht  
+    - @libp2p/delegated-peer-routing  

@@ -16,7 +16,8 @@ https://github.com/libp2p/go-libp2p-kad-dht/issues/147
 
 
 
-# libp2p DHT modes
+# libp2p DHT modes - Client/Server  
+- Client mode is default  
 - Well, it really query-only mode (mostly) versus full mode. The active side is actually the "client" (making requests), the "server" just responds to requests.  
 - Given enough bad nodes, a DHT becomes unusable.  
 - we have a ton of nodes behind NATs  
