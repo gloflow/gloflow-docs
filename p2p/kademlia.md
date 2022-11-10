@@ -91,31 +91,23 @@
 - BitTorrent  
 - Swarm  
 
-# libp2p implementation
-- IpfsDHT is an implementation of Kademlia with **S/Kademlia**, **Coral** and **mainlineDHT** modifications
-    - used to implement the base Routing module
-    - BitTorrent DHT spec - https://github.com/libp2p/specs/blob/master/kad-dht/README.md  
-- https://github.com/libp2p/go-libp2p-kad-dht
-- Distance  
-    - XOR(sha256(key1), sha256(key2))  
-- Replication Parameter *k*
-    - amount of replication is governed by it  
-    - recommended value for *k* is 20  
-- Concurrency parameter *α*  
-    - concurrency of node and value lookups are limited by this param  
-    - default value of 3  
-    - each lookup process can perform no more than 3 inflight requests, at any given time  
-- Node ID  
-    - spec - https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md  
-    - IDs are base58btc encoded (base58-bitcoin) - used to WIF for bitcoin address  
-- **Client/Server** mode  
-    - **Server** mode  
-        - unrestricted nodes; Internet, publicly routable nodes, e.g. servers in a datacenter  
-        - nodes advertise the libp2p Kademlia protocol identifier via the *identify* protocol  
-        - accept incoming streams using the Kademlia protocol identifier  
-    - **Client** mode 
-        - restricted nodes; those with intermittent availability, high latency, low bandwidth, low CPU/RAM/Storage; non-publicly routable nodes, e.g. laptops behind a NAT and firewall.  
-        - nodes do not advertise support for the libp2p Kademlia protocol identifier.  
-        - nodes do not offer the Kademlia protocol identifier for incoming streams.  
-    - Nodes add another node to their routing table if and only if that node operates in server mode. 
-        - allows restricted nodes to utilize the DHT (query the DHT), without decreasing the quality of the distributed hash table (without polluting the routing tables)  
+# p2p libp2p attacks
+**Sybil Attacks**
+- https://docs.libp2p.io/concepts/security-considerations/#sybil-attacks  
+- one operator spins up a large number of DHT peers with distinct identities to flood the network  
+- By controlling a large number of Sybil nodes (in proportion to the size of the network), a bad actor increases the probability of being in the lookup path for queries. 
+    - routing table posining
+- To target a specific key, they could improve their chances of being in the lookup path further by generating IDs that are “close” to the target key according the DHT’s distance metric  
+- Applications can guard against modification of data by:  
+    - detect if the data has been tampered with  
+        - signing values that are stored in the DHT  
+        - using content addressing, where a cryptographic hash of the stored value is used as the key, as in IPFS  
+       
+- investing doing PoW calculation on peer joining the network, just to prevent malicious actors from joning too many of their agents too rapidly. StorJ does this.  
+    - S/Kademlia extensions
+- encrypting values stored in a peer using that peers prviate key, and then other peers that consume that value decrypt it using that peers node ID. this way constitency of values stored by peers with given node IDs can be assured.
+
+
+**Eclipse attacks**
+- uses a large number of controlled nodes
+- targeted at a specific peer with the goal of distorting their “view” of the network

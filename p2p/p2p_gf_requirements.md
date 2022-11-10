@@ -66,7 +66,6 @@
     - executable in both the browser (by casual web users) and on the server (by powerful server farms and thirdparty companies)
     - Rust is callable from Py as well
 
-
 # Filecoin integration
 - lookin into it for incentivization for image file hosting by third-parties
 - FVM
@@ -78,7 +77,6 @@
     - filecoin actors - GF should have a native Filecoin actor to run in the Filecoin network?
 - dev-advocates are mentioning CDN/retreival networks being in the works; investigate this for image file serving
 - possibly look into integrating with Filecoing (having support for it in the GF nodes), to have an avenue of allowing/supporting financial incentivization of file-storage (at least using the IPFS backend).
-
 
 # p2p node keychain management
 - goal is to have sensical key loading
@@ -96,33 +94,10 @@
 - When a peer joins a DHT, it can use the key-value store to announce it presence and to find other peers in the network.
     - key used for announcing its presence is called the **rendezvous-point**
 
-# p2p libp2p attacks
-**Sybil Attacks**
-- https://docs.libp2p.io/concepts/security-considerations/#sybil-attacks  
-- one operator spins up a large number of DHT peers with distinct identities to flood the network  
-- By controlling a large number of Sybil nodes (in proportion to the size of the network), a bad actor increases the probability of being in the lookup path for queries. 
-    - routing table posining
-- To target a specific key, they could improve their chances of being in the lookup path further by generating IDs that are “close” to the target key according the DHT’s distance metric  
-- Applications can guard against modification of data by:  
-    - detect if the data has been tampered with  
-        - signing values that are stored in the DHT  
-        - using content addressing, where a cryptographic hash of the stored value is used as the key, as in IPFS  
-       
-- investing doing PoW calculation on peer joining the network, just to prevent malicious actors from joning too many of their agents too rapidly. StorJ does this.  
-    - S/Kademlia extensions
-- encrypting values stored in a peer using that peers prviate key, and then other peers that consume that value decrypt it using that peers node ID. this way constitency of values stored by peers with given node IDs can be assured.
-
-
-**Eclipse attacks**
-- uses a large number of controlled nodes
-- targeted at a specific peer with the goal of distorting their “view” of the network
-
-
 # Genesis event
 - a moment in time when the first 2 nodes of the network start up
 - does this event need to be managed in some special way
     - do we need to pick some initial values for the network via social consesus
-
 
 # Bootstrap nodes
 - currently the GF p2p test program uses the IPFS bootstrap nodes (same ones that the IPFS network uses and its clients)
@@ -137,23 +112,18 @@
 - light-clients are going to be short lived nodes (users running GF nodes on their laptops for a few hours eveyry week) when the only for example want to view files/images and consume content (not satisfy compute requests).
     - look into the libp2p JS/browser impelementation to see if light-clients/peers can be run in a browser tab by certain users.
 
-
 - potentially have storage-clients
     - clients/nodes that only store data/images, and cant do (or dont want to/dont advertise to be able to) conduct other operations (apply image filters/apply more comple image pipilens/apply ML piplines, etc)
-
 
 - might have ML-clients
     - clients that can execute (or are willing) ML pipilines.
 
-
 - build in this capability-level announcement process into the peer boostraping stage
     - when the peer first joins the network it announces which types of operations it is willing to satisfy/accept.
-
 
 - some users of the GF network are not even peers
     - they are purely users that connect to some peer that serves the GF or any other UI from that server
     - those users (JS code in the browser) might only interact with the GF REST API, which then in turn would via the peer interface interact with the GF network.
-
 
 # Blockchain
 - Holochain (@kevin) - 
