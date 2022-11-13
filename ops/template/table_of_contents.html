@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <title>GloFlow docs table-of-contents</title>
+    </head>
+    <body>
+
+        <div id="sections">
+            {% for section_name_str, section_files_lst in sections_docs_html_files_map.items() %}
+
+            <div class="section">
+                <div class="section_title">{{ section_name_str }}</div>
+                <div class="files">
+                {% for file_url_str in section_files_lst %}
+                    <div class="file_url">{{ file_url_str }}</div>
+                {% endfor %}
+                </div>
+            </div>
+            
+            {% endfor %}
+        </div>
+
+    </body>
+</html>

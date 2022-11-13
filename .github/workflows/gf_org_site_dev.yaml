@@ -27,6 +27,10 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: install python3 dependencies
+        run: |
+          pip3 install -r ops/requirements.txt
+
       #-------------------------------
       # BUILD_DOCS
       - name: build docs
