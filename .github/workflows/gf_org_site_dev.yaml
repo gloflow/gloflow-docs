@@ -28,7 +28,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           aws_bucket: 'gloflow.org'
           source_dir: 'docs'
-          destination_dir: 'static'
+          destination_dir: 'docs'
 
       #-------------------------------
 
