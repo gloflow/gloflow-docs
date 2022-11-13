@@ -75,3 +75,9 @@
     - https://discuss.libp2p.io/t/nebula-libp2p-dht-crawler/950  
     - DHT crawler that also monitors the liveness and availability of peers  
     - crawler connects to the standard DHT bootstrap nodes and then recursively follows all entries in their k-buckets until all peers have been visited  
+
+
+# Major TODO's remaining that we need for initial protocol implementation  
+- get DHT k/v ops (put/get) to function  
+- how to get GF bootstrap nodes to function (so we dont use IPFS bootstrap nodes)  
+- 
