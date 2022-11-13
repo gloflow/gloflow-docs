@@ -25,10 +25,10 @@ def build():
     
     print("build docs")
 
-    table_of_contents_target_file_str = f"{modd_str}/../static/table_of_contents.html"
+    table_of_contents_target_file_str = f"{modd_str}/../build/table_of_contents.html"
     docs_dirs_lst = [
-        ("main", f"{modd_str}/../docs",     f"{modd_str}/../static",     "/docs"),
-        ("p2p",  f"{modd_str}/../docs/p2p", f"{modd_str}/../static/p2p", "/docs/p2p")
+        ("main", f"{modd_str}/../docs",     f"{modd_str}/../build",     "/docs"),
+        ("p2p",  f"{modd_str}/../docs/p2p", f"{modd_str}/../build/p2p", "/docs/p2p")
     ]
 
 
