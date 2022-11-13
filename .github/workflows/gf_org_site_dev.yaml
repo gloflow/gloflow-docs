@@ -17,8 +17,22 @@ jobs:
 
       #-------------------------------
       # GIT_CHECKOUT
-      - uses: actions/checkout@v2
+      - name: checkout gloflow-docs repo
+        uses: actions/checkout@v3
+      
+      #-------------------------------
+      # INITIALIZE_PYTHON3
+      - name: initialize python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
+      #-------------------------------
+      # BUILD_DOCS
+      - name: build docs
+        run: |
+          python3 ops/gf_build_docs.py
+          
       #-------------------------------
       # S3_UPLOAD
       - name: push docs to GF org s3
@@ -27,7 +41,7 @@ jobs:
           aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
           aws_bucket: 'gloflow.org'
-          source_dir: 'docs'
+          source_dir: 'build'
           destination_dir: 'docs'
 
       #-------------------------------
