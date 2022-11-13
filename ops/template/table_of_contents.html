@@ -13,7 +13,9 @@
                 <div class="section_title">{{ section_name_str }}</div>
                 <div class="files">
                 {% for file_url_str in section_files_lst %}
-                    <a class="file_url" href="{{ file_url_str }}">{{ os.path.basename(file_url_str).split(".")[0].replace("_", " ") }}</a>
+                    <div class="file">
+                        <a class="file_url" href="{{ file_url_str }}">{{ os.path.basename(file_url_str).split(".")[0].replace("_", " ") }}</a>
+                    </div>
                 {% endfor %}
                 </div>
             </div>
