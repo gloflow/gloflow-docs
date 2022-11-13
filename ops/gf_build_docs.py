@@ -64,7 +64,8 @@ def build_docs_index(p_sections_docs_html_files_map,
 
     f = open(f"{modd_str}/template/table_of_contents.html", "r")
     template = jinja2.Template(f.read())
-    out_str  = template.render(sections_docs_html_files_map=p_sections_docs_html_files_map)
+    out_str  = template.render(sections_docs_html_files_map=p_sections_docs_html_files_map,
+        os=os)
 
     f.close()
 

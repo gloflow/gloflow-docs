@@ -1,6 +1,8 @@
 <html>
     <head>
         <title>GloFlow docs table-of-contents</title>
+
+        <link rel="stylesheet" type="text/css" href="/static/css/docs_table_of_contents.css"/>
     </head>
     <body>
 
@@ -11,7 +13,7 @@
                 <div class="section_title">{{ section_name_str }}</div>
                 <div class="files">
                 {% for file_url_str in section_files_lst %}
-                    <div class="file_url">{{ file_url_str }}</div>
+                    <a class="file_url" href="{{ file_url_str }}">{{ os.path.basename(file_url_str).split(".")[0].replace("_", " ") }}</a>
                 {% endfor %}
                 </div>
             </div>
