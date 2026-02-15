@@ -1,0 +1,70 @@
+{
+  "name": "GloFlow",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.png",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#04533D"
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com"
+    }
+  ],
+  "tabs": [
+    {
+      "name": "Documentation",
+      "url": "docs"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "docs/introduction"
+      ]
+    },
+    {
+      "group": "Core",
+      "pages": [
+        "docs/api",
+        "docs/apps-core",
+        "docs/db",
+        "docs/identity",
+        "docs/file-system",
+        "docs/image_storage",
+        "docs/images_solo",
+        "docs/ui",
+        "docs/langs",
+        "docs/code_style"
+      ]
+    },
+    {
+      "group": "P2P",
+      "pages": [
+        "docs/p2p/p2p",
+        "docs/p2p/p2p_crawler_protocol",
+        "docs/p2p/kademlia",
+        "docs/p2p/libp2p",
+        "docs/p2p/p2p_gf_requirements",
+        "docs/p2p/forum_comments"
+      ]
+    },
+    {
+      "group": "Languages",
+      "pages": [
+        "docs/glo-lang/glo-lang"
+      ]
+    }
+  ],
+  "exclude": [
+    "docs/history.md",
+    "docs/github-markdown.css",
+    "ops/**"
+  ]
+}

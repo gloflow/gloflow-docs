@@ -15,32 +15,36 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+
+
 import os, sys
 modd_str = os.path.abspath(os.path.dirname(__file__)) # module dir
-
+https://gloflow.mintlify.app/
 import jinja2
 
 #--------------------------------------------------
 def build():
-    
+
     print("build docs")
 
     table_of_contents_target_file_str = f"{modd_str}/../build/table_of_contents.html"
     docs_dirs_lst = [
-        ("main", f"{modd_str}/../docs",     f"{modd_str}/../build",     "/docs"),
-        ("p2p",  f"{modd_str}/../docs/p2p", f"{modd_str}/../build/p2p", "/docs/p2p")
+        ("main",     f"{modd_str}/../docs",          f"{modd_str}/../build",          "/docs"),
+        ("p2p",      f"{modd_str}/../docs/p2p",      f"{modd_str}/../build/p2p",      "/docs/p2p"),
+        ("glo-lang", f"{modd_str}/../docs/glo-lang", f"{modd_str}/../build/glo-lang", "/docs/glo-lang"),
     ]
+
 
 
     sections_docs_html_files_map = {}
     for section_name_str, d_str, d_target_str, url_base_str in docs_dirs_lst:
-        
+
         os.system(f"mkdir -p {d_target_str}")
         section_files_lst = []
 
         for f_str in os.listdir(d_str):
             if f_str.endswith(".md"):
-                
+
                 target_html_file_str = f"{f_str.split('.')[0]}.html"
                 target_html_file_path_str = f"{d_target_str}/{f_str.split('.')[0]}.html"
 
@@ -74,7 +78,7 @@ def build_docs_index(p_sections_docs_html_files_map,
     f_target.close()
 
     print(out_str)
-            
+
 #--------------------------------------------------
 if __name__ == "__main__":
     build()
