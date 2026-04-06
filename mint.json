@@ -45,6 +45,12 @@
       ]
     },
     {
+      "group": "Images",
+      "pages": [
+        "docs/images/gf_images_lib"
+      ]
+    },
+    {
       "group": "P2P",
       "pages": [
         "docs/p2p/p2p",

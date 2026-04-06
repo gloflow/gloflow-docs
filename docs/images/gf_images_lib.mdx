@@ -1,0 +1,665 @@
+---
+title: GF Images Library
+description: Comprehensive guide to the GloFlow image processing and management library
+---
+
+# GF Images Library
+
+The `gf_images_lib` package is the core image processing and management system in GloFlow. It provides a complete solution for uploading, processing, storing, and serving images with support for multiple storage backends.
+
+## Overview
+
+The images library handles the full lifecycle of images in the GloFlow system:
+
+- **Upload Management**: Client-side direct uploads via presigned URLs
+- **Image Processing**: Automatic thumbnail generation, format conversion, and transformations
+- **Storage**: Flexible storage backend support (S3, local filesystem, IPFS)
+- **Jobs System**: Asynchronous processing of image operations
+- **Flows**: Organization of images into logical collections
+- **Classification**: ML-based image classification capabilities
+
+## Architecture
+
+The library is organized into several key subsystems:
+
+- **gf_images_core**: Core image data structures and operations
+- **gf_images_storage**: Storage abstraction layer
+- **gf_images_jobs_core**: Jobs manager for async processing
+- **gf_images_service**: High-level service layer
+- **gf_images_flows**: Image collections/flows management
+- **gf_gif_lib**: GIF-specific handling
+- **gf_image_editor**: Image editing capabilities
+
+---
+
+## HTTP Handlers
+
+### Image Operations
+
+#### `/images/d/<image_name>`
+**Method**: GET  
+**Auth**: Not required  
+**Description**: Resolve and redirect to the public URL of an image.
+
+**Query Parameters**:
+- `fname` - Flow name (default: "general")
+
+**Use Case**: Permanent URL for embedding images. This endpoint provides a stable reference that redirects to the actual storage location.
+
+---
+
+#### `/v1/images/get`
+**Method**: GET  
+**Auth**: Optional  
+**Description**: Retrieve metadata and information about a specific image.
+
+**Query Parameters**:
+- `img_id` - GloFlow image ID
+
+**Response**:
+```json
+{
+  "image_exists_bool": true,
+  "image_export_map": {
+    "id": "...",
+    "url": "...",
+    "thumbnails": {...}
+  }
+}
+```
+
+---
+
+#### `/v1/images/classify`
+**Method**: POST  
+**Auth**: Required  
+**Description**: Classify one or more images using ML models.
+
+**Request Body**:
+```json
+{
+  "client_type_str": "web",
+  "images_ids_lst": ["img_id_1", "img_id_2"]
+}
+```
+
+**Response**:
+```json
+{
+  "classes_lst": ["person", "outdoor", "nature"]
+}
+```
+
+**Use Case**: Automatic tagging and categorization of images for search and organization.
+
+---
+
+#### `/v1/images/share`
+**Method**: POST  
+**Auth**: Required  
+**Description**: Share an image via email.
+
+**Request Body**:
+```json
+{
+  "image_id": "img_123",
+  "email_address": "user@example.com",
+  "email_subject": "Check out this image",
+  "email_body": "Here's an interesting image..."
+}
+```
+
+**Use Case**: Direct image sharing from the platform.
+
+---
+
+### Upload Workflow
+
+The upload process is a two-step workflow designed for efficient direct-to-storage uploads:
+
+#### Step 1: `/v1/images/upload_init`
+**Method**: GET  
+**Auth**: Required  
+**Description**: Initialize an upload and receive a presigned URL for direct upload to storage.
+
+**Query Parameters**:
+- `imgf` - Image format (e.g., "jpeg", "png")
+- `imgn` - Image name (optional)
+- `f` - Comma-separated flow names
+- `ct` - Client type
+
+**Response**:
+```json
+{
+  "upload_info_map": {
+    "image_id": "img_xyz",
+    "presigned_url": "https://s3.../upload",
+    "upload_url": "...",
+    "fields": {...}
+  }
+}
+```
+
+**Flow**:
+1. Client calls this endpoint
+2. Server generates unique image ID
+3. Server creates presigned S3 URL (if using S3)
+4. Client uploads directly to storage using presigned URL
+5. Client calls upload_complete
+
+---
+
+#### Step 2: `/v1/images/upload_complete`
+**Method**: POST  
+**Auth**: Required  
+**Description**: Notify the server that upload is complete and trigger processing.
+
+**Query Parameters**:
+- `imgid` - Image ID from upload_init
+- `f` - Comma-separated flow names
+
+**Request Body**:
+```json
+{
+  "meta_map": {
+    "custom_field": "value"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "images_job_id_str": "job_abc123"
+}
+```
+
+**Processing**: 
+- Image is validated
+- Thumbnails are generated
+- Image is added to specified flows
+- Job ID is returned for status tracking
+
+---
+
+#### `/v1/images/upload_metrics`
+**Method**: POST  
+**Auth**: Required  
+**Description**: Report client-side upload metrics for monitoring.
+
+**Query Parameters**:
+- `imgid` - Image ID
+- `ct` - Client type
+
+**Request Body**: Metrics data map
+
+**Use Case**: Performance monitoring and optimization of upload pipeline.
+
+---
+
+### Jobs Management
+
+#### `/images/jobs/start`
+**Method**: POST  
+**Auth**: Should be authenticated (FIX in progress)  
+**Description**: Start a new image processing job for external images.
+
+**Request Body**:
+```json
+{
+  "job_type_str": "process_extern_images",
+  "client_type_str": "web",
+  "imgs_urls_str": "url1,url2,url3",
+  "imgs_origin_pages_urls_str": "page1,page2,page3"
+}
+```
+
+**Response**:
+```json
+{
+  "running_job_id_str": "job_xyz",
+  "job_expected_outputs_lst": [...]
+}
+```
+
+**Use Case**: Batch processing of images from external URLs.
+
+---
+
+#### `/images/jobs/status`
+**Method**: GET (SSE - Server-Sent Events)  
+**Auth**: Not required  
+**Description**: Stream real-time status updates for a running job.
+
+**Query Parameters**:
+- `images_job_id_str` - Job ID to monitor
+
+**Response**: SSE stream of job updates
+```
+id: 1234567890.123
+data: {"name_str":"...", "type_str":"ok", "image_id_str":"..."}
+
+id: 1234567891.456
+data: {"name_str":"...", "type_str":"completed"}
+```
+
+**Update Types**:
+- `ok` - Processing step completed successfully
+- `error` - Error occurred with error details
+- `completed` - Job finished
+
+**Note**: This is a legacy endpoint. Prefer the general GF events streaming endpoint.
+
+---
+
+### Flows Management
+
+#### `/v1/images/flows/all`
+**Method**: GET  
+**Auth**: Not required  
+**Description**: Get list of all available image flows.
+
+**Response**:
+```json
+{
+  "all_flows_lst": ["general", "gallery", "products"]
+}
+```
+
+---
+
+#### `/v1/images/flows/add_img`
+**Method**: POST  
+**Auth**: Required  
+**Description**: Add an external image to one or more flows.
+
+**Request Body**:
+```json
+{
+  "image_extern_url_str": "https://example.com/image.jpg",
+  "image_origin_page_url_str": "https://example.com/page",
+  "client_type_str": "web",
+  "flows_names_lst": ["gallery", "featured"]
+}
+```
+
+**Response**:
+```json
+{
+  "running_job_id_str": "job_123",
+  "thumbnail_small_relative_url_str": "/thumbnails/...",
+  "image_id_str": "img_xyz"
+}
+```
+
+**Processing**: Image is fetched, processed, and added to specified flows asynchronously.
+
+---
+
+### Image Editor
+
+#### `/images/editor/save`
+**Method**: POST  
+**Auth**: Not required (should be added)  
+**Description**: Save an edited image.
+
+**Use Case**: Client-side image editing with server-side persistence.
+
+---
+
+### GIF Operations
+
+#### `/images/gif/get_info`
+**Method**: GET  
+**Auth**: Not required  
+**Description**: Retrieve information about a GIF image.
+
+**Query Parameters**:
+- `orig_url` - Original URL of the GIF (option 1)
+- `gfimg_id` - GloFlow image ID (option 2)
+
+**Response**:
+```json
+{
+  "gif_map": {
+    "id": "...",
+    "frames_count": 10,
+    "duration": 3.5,
+    "...": "..."
+  }
+}
+```
+
+---
+
+### Browser Client Processing
+
+#### `/v1/images/c`
+**Method**: POST  
+**Auth**: Not required  
+**Description**: Receive processing results from browser-based distributed jobs.
+
+**Request Body**:
+```json
+{
+  "jr": [
+    {
+      "job_id": "...",
+      "result": "..."
+    }
+  ]
+}
+```
+
+**Use Case**: Distributed computing where image processing is offloaded to client browsers.
+
+---
+
+### Health Check
+
+#### `/v1/images/v1/healthz`
+**Method**: GET  
+**Auth**: Not required  
+**Description**: Health check endpoint for infrastructure monitoring.
+
+**Note**: Path will be simplified to `/v1/images/healthz` in future version.
+
+---
+
+## Storage System
+
+The storage system provides a unified interface for multiple storage backends:
+
+### Storage Types
+
+#### Local Storage
+Files stored on the local filesystem.
+
+**Configuration**:
+- `ThumbsDirPathStr` - Directory for thumbnails
+- `UploadsSourceDirPathStr` - Upload staging directory
+- `UploadsTargetDirPathStr` - Final upload destination
+- `ExternImagesDirPathStr` - External images cache
+
+#### S3 Storage
+AWS S3 cloud storage.
+
+**Features**:
+- Presigned URL generation for direct uploads
+- Multi-bucket support for different image types
+- Automatic public URL generation
+
+**Configuration**:
+- `ThumbsS3bucketNameStr` - S3 bucket for thumbnails
+- `UploadsSourceS3bucketNameStr` - Upload staging bucket
+- `UploadsTargetS3bucketNameStr` - Final upload bucket
+- `ExternImagesS3bucketNameStr` - External images bucket
+
+#### IPFS Storage
+InterPlanetary File System for decentralized storage.
+
+**Features**:
+- Content-addressed storage
+- Permanent, immutable image references
+- Distributed hosting
+
+**Configuration**:
+- `IPFSnodeHostStr` - IPFS node connection
+
+### Storage Operations
+
+The storage layer provides these core operations:
+
+- **Get**: Download image from storage to local filesystem
+- **Put**: Upload image from local filesystem to storage
+- **Copy**: Copy image between storage locations/buckets
+- **GeneratePresignedURL**: Create temporary upload/download URLs
+
+### Multi-Storage Support
+
+Images can be stored across multiple backends simultaneously:
+- Primary storage for serving (typically S3)
+- Backup storage (local or another cloud)
+- Archival storage (IPFS for permanence)
+
+---
+
+## Jobs Manager
+
+The jobs manager handles asynchronous image processing operations.
+
+### Job Types
+
+#### External Images Job
+Process images from external URLs.
+
+**Operations**:
+1. Fetch image from URL
+2. Validate format and size
+3. Generate thumbnails (multiple sizes)
+4. Extract metadata
+5. Store in configured storage
+6. Add to flows
+7. Update database
+
+**Input**: List of image URLs with origin pages
+
+---
+
+#### Uploaded Images Job
+Process user-uploaded images.
+
+**Operations**:
+1. Validate uploaded file
+2. Detect format
+3. Generate thumbnails
+4. Create multiple sizes/formats
+5. Move from staging to production storage
+6. Index in database
+
+**Input**: Image ID from upload_init
+
+---
+
+#### Local Images Job
+Process images already on local filesystem.
+
+**Use Case**: Batch processing, migration, or background processing of local image sets.
+
+---
+
+#### Image Classification Job
+Run ML models on images for automatic tagging.
+
+**Operations**:
+1. Load image
+2. Preprocess for ML model
+3. Run classification model
+4. Extract top classes/tags
+5. Store classification results
+
+**Output**: List of classification labels with confidence scores
+
+---
+
+### Job Lifecycle
+
+1. **Submission**: Client submits job via API
+2. **Initialization**: Job manager creates job record
+3. **Processing**: Worker processes images
+4. **Updates**: Status updates sent via SSE or events
+5. **Completion**: Final status persisted to database
+6. **Cleanup**: Temporary files removed
+
+### Job Status Tracking
+
+Jobs can be in these states:
+- `running` - Currently processing
+- `completed` - Successfully finished
+- `failed` - Failed completely
+- `failed_partial` - Some images failed, some succeeded
+
+### Job Updates
+
+Real-time updates via Server-Sent Events:
+- `ok` - Step completed successfully
+- `error` - Error with details
+- `completed` - Job finished
+
+---
+
+## Image Flows
+
+Flows are logical collections of images organized by purpose or category.
+
+### Flow Concepts
+
+- **Flow Name**: Unique identifier (e.g., "gallery", "products", "avatars")
+- **Flow-to-S3-Bucket Mapping**: Each flow can use a different S3 bucket
+- **Multi-Flow Images**: Images can belong to multiple flows
+
+### Common Flow Patterns
+
+- **general**: Default flow for miscellaneous images
+- **gallery**: Public image galleries
+- **products**: E-commerce product images
+- **avatars**: User profile images
+- **backgrounds**: Background/wallpaper images
+
+### Flow Operations
+
+- **Add Image to Flow**: Associate existing or new image with flow
+- **List All Flows**: Get available flows
+- **Get Flow Images**: Query images in a specific flow
+- **Flow-based Storage**: Route images to appropriate S3 buckets
+
+---
+
+## Image Processing Pipeline
+
+### Thumbnail Generation
+
+Automatic generation of multiple thumbnail sizes:
+- **Small**: Quick preview (typically 150x150)
+- **Medium**: List/grid view (typically 400x400)
+- **Large**: Detail view (typically 800x800)
+
+**Format**: Optimized JPEG or WebP for size reduction
+
+### Image Transformations
+
+- Format conversion (JPEG, PNG, WebP)
+- Resizing with aspect ratio preservation
+- Quality optimization
+- Metadata extraction (EXIF, dimensions, format)
+
+### Processing Plugins
+
+Extensible plugin system for custom processing:
+- Custom filters
+- Watermarking
+- Face detection
+- Custom ML models
+
+---
+
+## Best Practices
+
+### Upload Workflow
+
+1. **Use upload_init/upload_complete**: This avoids server bandwidth bottlenecks
+2. **Upload directly to S3**: Use presigned URLs for client-to-S3 uploads
+3. **Track job status**: Monitor processing via SSE endpoint
+4. **Handle failures**: Implement retry logic for failed uploads
+
+### Performance
+
+1. **Use appropriate flows**: Organize images for efficient storage
+2. **Leverage thumbnails**: Serve thumbnails for lists/grids
+3. **CDN integration**: Use CloudFront or similar for S3 buckets
+4. **Batch operations**: Use jobs for processing multiple images
+
+### Security
+
+1. **Authenticate uploads**: All upload endpoints require auth
+2. **Validate formats**: Server validates image formats and sizes
+3. **Rate limiting**: Implement rate limits for upload endpoints
+4. **Presigned URL expiration**: URLs expire after short time window
+
+---
+
+## Configuration
+
+### Required Configuration
+
+```go
+gf_images_core.GFconfig{
+  ImagesFlowToS3bucketMap: map[string]string{
+    "general": "my-images-bucket",
+    "gallery": "my-gallery-bucket",
+  },
+  UseNewStorageEngineBool: true,
+  ImagesClassifyPyDirPathStr: "/path/to/ml/models",
+}
+```
+
+### Storage Configuration
+
+```go
+gf_images_storage.GFimageStorageConfig{
+  TypesToProvisionLst: []string{"s3", "local"},
+  
+  // S3
+  ThumbsS3bucketNameStr: "thumbnails-bucket",
+  UploadsSourceS3bucketNameStr: "uploads-staging",
+  UploadsTargetS3bucketNameStr: "uploads-production",
+  
+  // Local
+  ThumbsDirPathStr: "/var/gf/thumbnails",
+  UploadsTargetDirPathStr: "/var/gf/images",
+}
+```
+
+---
+
+## Error Handling
+
+Common error scenarios:
+
+- **Invalid image format**: Server rejects non-image uploads
+- **File too large**: Size limits enforced
+- **Storage failure**: S3 upload/download errors
+- **Processing timeout**: Long-running jobs may timeout
+- **Flow not found**: Unknown flow name in request
+
+All errors return standard GloFlow error format with descriptive messages.
+
+---
+
+## Metrics and Monitoring
+
+### Available Metrics
+
+- Upload success/failure rates
+- Processing time per image
+- Thumbnail generation time
+- Storage operation latency
+- Job queue depth
+- Error rates by type
+
+### Monitoring Endpoints
+
+- `/v1/images/v1/healthz` - Service health
+- Job status SSE streams - Real-time job monitoring
+
+---
+
+## Future Improvements
+
+Planned enhancements noted in code:
+
+1. **Authentication**: Add auth to image editor endpoints
+2. **Bulk operations**: `/images/d/bulk` for batch URL resolution
+3. **Path simplification**: Clean up healthz endpoint path
+4. **Event streaming**: Move all clients to new events system
+5. **Flow arguments**: Accept flows_names from HTTP args in jobs
